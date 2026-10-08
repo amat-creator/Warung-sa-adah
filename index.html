@@ -238,12 +238,12 @@
                 <div class="p-4 sm:p-5 border-b flex justify-between items-center bg-white">
                     <div>
                         <h3 class="font-bold text-lg flex items-center gap-2"><i class="fas fa-boxes text-purple-600"></i> Kelola Data Produk</h3>
-                        <p class="text-xs text-slate-500">Edit Nama, HPP, Harga Jual, Stok, & Backup Excel</p>
+                        <p class="text-xs text-slate-500">Edit Nama, Modal (HPP), Harga Jual, Stok, & Backup Excel</p>
                     </div>
                     <button onclick="closeProductManager()" class="text-slate-400 hover:text-slate-600 w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 transition-colors"><i class="fas fa-times text-xl"></i></button>
                 </div>
                 
-                <!-- Action Tools (Search, Add, Excel Import/Export) -->
+                <!-- Action Tools (Search, Add, Reset, Excel Import/Export) -->
                 <div class="p-4 bg-white border-b border-slate-200 flex flex-col sm:flex-row gap-2 justify-between">
                     <div class="relative flex-1">
                         <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
@@ -253,6 +253,9 @@
                     <div class="flex gap-2 flex-wrap sm:flex-nowrap">
                         <button onclick="openAddProductModal()" class="bg-purple-600 text-white font-bold px-3.5 py-2 rounded-xl hover:bg-purple-700 transition-colors shrink-0 flex items-center gap-1.5 text-xs shadow-md shadow-purple-200">
                             <i class="fas fa-plus"></i> Tambah
+                        </button>
+                        <button onclick="resetDefaultData()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-2 rounded-xl transition-colors shrink-0 flex items-center gap-1 text-xs" title="Reset ke Data Bawaan Asli">
+                            <i class="fas fa-sync-alt text-amber-500"></i> Reset Default
                         </button>
                         <button onclick="exportProductsToExcel()" class="bg-emerald-600 text-white font-bold px-3.5 py-2 rounded-xl hover:bg-emerald-700 transition-colors shrink-0 flex items-center gap-1.5 text-xs shadow-md shadow-emerald-200" title="Export Produk ke Excel">
                             <i class="fas fa-file-export"></i> Export Excel
@@ -298,12 +301,12 @@
                     </div>
                     <div class="grid grid-cols-3 gap-2">
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Modal / HPP (Rp)</label>
-                            <input type="number" id="newProdHpp" placeholder="3000" class="w-full bg-slate-100 p-2.5 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-purple-500">
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Modal (Rp)</label>
+                            <input type="number" id="newProdHpp" placeholder="3500" class="w-full bg-slate-100 p-2.5 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-purple-500">
                         </div>
                         <div>
                             <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Harga Jual (Rp)</label>
-                            <input type="number" id="newProdPrice" placeholder="5000" class="w-full bg-slate-100 p-2.5 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-purple-500">
+                            <input type="number" id="newProdPrice" placeholder="3500" class="w-full bg-slate-100 p-2.5 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-purple-500">
                         </div>
                         <div>
                             <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Stok Awal</label>
@@ -356,61 +359,117 @@
     </div>
 
     <script>
-        // Data Produk Awal
+        // Data Produk Lengkap Presisi Sesuai Isian Asli Pengguna
         const rawProducts = [
-            { name: "Mie Soto Banjar Biasa", category: "Makanan", hpp: 3000, price: 3500 },
-            { name: "Mie Soto Banjar Limau Kuit", category: "Makanan", hpp: 3000, price: 3500 },
-            { name: "Mie Sedap Goreng", category: "Makanan", hpp: 3500, price: 4000 },
-            { name: "Mie Indomie Goreng", category: "Makanan", hpp: 3000, price: 3500 },
-            { name: "Mie Sakura Hijau", category: "Makanan", hpp: 1500, price: 2000 },
-            { name: "Mie Sakura Habang", category: "Makanan", hpp: 2500, price: 3000 },
-            { name: "Mie Sakura Putih", category: "Makanan", hpp: 1500, price: 2000 },
-            { name: "Mie Sakura Seblak", category: "Makanan", hpp: 1500, price: 2000 },
-            { name: "Pop Mie Ganal", category: "Makanan", hpp: 5000, price: 6000 },
-            { name: "Pop Mie Halus", category: "Makanan", hpp: 3200, price: 4000 },
-            { name: "Mie Sedap Soto", category: "Makanan", hpp: 3000, price: 3500 },
-            { name: "Mie Indomie Geprek", category: "Makanan", hpp: 3000, price: 3500 },
-            { name: "Mie Sarimi", category: "Makanan", hpp: 3000, price: 3500 },
-            { name: "Telor Ayam", category: "Kebutuhan Harian", hpp: 2000, price: 2500 },
-            { name: "Sarimi Isi 2", category: "Makanan", hpp: 4000, price: 5000 },
-            { name: "Aqua Ganal", category: "Minuman", hpp: 6500, price: 8000 },
-            { name: "Aqua Tanggung", category: "Minuman", hpp: 4000, price: 5000 },
-            { name: "Le Minerale Ganal", category: "Minuman", hpp: 6500, price: 8000 },
-            { name: "Le Minerale Tanggung", category: "Minuman", hpp: 4000, price: 5000 },
-            { name: "Cleo Tanggung", category: "Minuman", hpp: 3000, price: 4000 },
-            { name: "Susu Cimory Yogurt", category: "Minuman", hpp: 5800, price: 7000 },
-            { name: "Susu Cimory Fresh Milk", category: "Minuman", hpp: 5800, price: 7000 },
-            { name: "Susu Beruang", category: "Minuman", hpp: 10000, price: 12000 },
-            { name: "Susu 7 Kurma", category: "Minuman", hpp: 4000, price: 5000 },
-            { name: "Milku", category: "Minuman", hpp: 4800, price: 6000 },
-            { name: "Kopi Golda", category: "Minuman", hpp: 4800, price: 6000 },
-            { name: "Kopi ABC", category: "Minuman", hpp: 5500, price: 7000 },
-            { name: "Kopi Kapal Api", category: "Minuman", hpp: 5500, price: 7000 },
-            { name: "Kopi Good Day", category: "Minuman", hpp: 6500, price: 8000 },
-            { name: "Kopi Nescafe", category: "Minuman", hpp: 6500, price: 8000 },
-            { name: "Lasegar Kaleng", category: "Minuman", hpp: 5500, price: 7000 },
-            { name: "Kratindeng", category: "Minuman", hpp: 4800, price: 6000 },
-            { name: "C1000", category: "Minuman", hpp: 4800, price: 6000 },
-            { name: "Mizone", category: "Minuman", hpp: 4000, price: 5000 },
-            { name: "Teh Pucuk", category: "Minuman", hpp: 3800, price: 5000 },
-            { name: "Teh Kotak", category: "Minuman", hpp: 4800, price: 6000 },
-            { name: "Mipis Madu", category: "Minuman", hpp: 4800, price: 6000 },
-            { name: "Fanta", category: "Minuman", hpp: 4800, price: 6000 },
-            { name: "Coca-Cola", category: "Minuman", hpp: 4800, price: 6000 },
-            { name: "Sprite", category: "Minuman", hpp: 4800, price: 6000 },
-            { name: "Tebs", category: "Minuman", hpp: 6500, price: 8000 },
-            { name: "Nutri Boost", category: "Minuman", hpp: 6500, price: 8000 },
-            { name: "Floridina", category: "Minuman", hpp: 3800, price: 5000 },
-            { name: "Pulpy Orange", category: "Minuman", hpp: 5500, price: 7000 },
-            { name: "Fruit Tea", category: "Minuman", hpp: 4800, price: 6000 },
-            { name: "Buavita", category: "Minuman", hpp: 8000, price: 10000 },
-            { name: "Yakult", category: "Minuman", hpp: 2400, price: 3000 },
-            { name: "Hydro Coco", category: "Minuman", hpp: 8000, price: 10000 },
-            { name: "Pocari Sweat", category: "Minuman", hpp: 5500, price: 7000 },
-            { name: "Qtela", category: "Makanan", hpp: 5500, price: 7000 },
-            { name: "Taro Ganal", category: "Makanan", hpp: 4800, price: 6000 },
-            { name: "Roti Aoka", category: "Makanan", hpp: 1500, price: 2000 },
-            { name: "Beng-Beng", category: "Makanan", hpp: 2000, price: 2500 },
+            { name: "Mie Soto Banjar Biasa", category: "Makanan", hpp: 3500, price: 3500 },
+            { name: "Mie Soto Banjar Limau Kuit", category: "Makanan", hpp: 3500, price: 3500 },
+            { name: "Mie Sedap Goreng", category: "Makanan", hpp: 4000, price: 4000 },
+            { name: "Mie Indomie Goreng", category: "Makanan", hpp: 3500, price: 3500 },
+            { name: "Mie Sakura Hijau", category: "Makanan", hpp: 2000, price: 2000 },
+            { name: "Mie Sakura Habang", category: "Makanan", hpp: 3000, price: 3000 },
+            { name: "Mie Sakura Putih", category: "Makanan", hpp: 2000, price: 2000 },
+            { name: "Mie Sakura Seblak", category: "Makanan", hpp: 2000, price: 2000 },
+            { name: "Pop Mie Ganal", category: "Makanan", hpp: 6000, price: 6000 },
+            { name: "Pop Mie Halus", category: "Makanan", hpp: 4000, price: 4000 },
+            { name: "Mie Sedap Soto", category: "Makanan", hpp: 3500, price: 3500 },
+            { name: "Mie Indomie Geprek", category: "Makanan", hpp: 3500, price: 3500 },
+            { name: "Mie Sarimi", category: "Makanan", hpp: 3500, price: 3500 },
+            { name: "Telor Ayam", category: "Kebutuhan Harian", hpp: 2500, price: 2500 },
+            { name: "Sarimi Isi 2", category: "Makanan", hpp: 5000, price: 5000 },
+            { name: "Aqua Ganal", category: "Minuman", hpp: 8000, price: 8000 },
+            { name: "Aqua Tanggung", category: "Minuman", hpp: 5000, price: 5000 },
+            { name: "Le Minerale Ganal", category: "Minuman", hpp: 8000, price: 8000 },
+            { name: "Le Minerale Tanggung", category: "Minuman", hpp: 5000, price: 5000 },
+            { name: "Cleo Tanggung", category: "Minuman", hpp: 4000, price: 4000 },
+            { name: "Susu Cimory Yogurt", category: "Minuman", hpp: 7000, price: 7000 },
+            { name: "Susu Cimory Fresh Milk", category: "Minuman", hpp: 7000, price: 7000 },
+            { name: "Susu Beruang", category: "Minuman", hpp: 12000, price: 12000 },
+            { name: "Susu 7 Kurma", category: "Minuman", hpp: 5000, price: 5000 },
+            { name: "Milku", category: "Minuman", hpp: 6000, price: 6000 },
+            { name: "Kopi Golda", category: "Minuman", hpp: 6000, price: 6000 },
+            { name: "Kopi ABC", category: "Minuman", hpp: 7000, price: 7000 },
+            { name: "Kopi Kapal Api", category: "Minuman", hpp: 7000, price: 7000 },
+            { name: "Kopi Good Day", category: "Minuman", hpp: 8000, price: 8000 },
+            { name: "Kopi Nescafe", category: "Minuman", hpp: 8000, price: 8000 },
+            { name: "Lasegar Kaleng", category: "Minuman", hpp: 7000, price: 7000 },
+            { name: "Kratindeng", category: "Minuman", hpp: 6000, price: 6000 },
+            { name: "C1000", category: "Minuman", hpp: 6000, price: 6000 },
+            { name: "Mizone", category: "Minuman", hpp: 5000, price: 5000 },
+            { name: "Teh Pucuk", category: "Minuman", hpp: 5000, price: 5000 },
+            { name: "Teh Kotak", category: "Minuman", hpp: 6000, price: 6000 },
+            { name: "Mipis Madu", category: "Minuman", hpp: 6000, price: 6000 },
+            { name: "Fanta", category: "Minuman", hpp: 6000, price: 6000 },
+            { name: "Coca-Cola", category: "Minuman", hpp: 6000, price: 6000 },
+            { name: "Sprite", category: "Minuman", hpp: 6000, price: 6000 },
+            { name: "Tebs", category: "Minuman", hpp: 8000, price: 8000 },
+            { name: "Nutri Boost", category: "Minuman", hpp: 8000, price: 8000 },
+            { name: "Floridina", category: "Minuman", hpp: 5000, price: 5000 },
+            { name: "Pulpy Orange", category: "Minuman", hpp: 7000, price: 7000 },
+            { name: "Fruit Tea", category: "Minuman", hpp: 6000, price: 6000 },
+            { name: "Buavita", category: "Minuman", hpp: 10000, price: 10000 },
+            { name: "Yakult", category: "Minuman", hpp: 3000, price: 3000 },
+            { name: "Hydro Coco", category: "Minuman", hpp: 10000, price: 10000 },
+            { name: "Pocari Sweat", category: "Minuman", hpp: 7000, price: 7000 },
+            { name: "Tisu Halus", category: "Kebutuhan Harian", hpp: 6000, price: 6000 },
+            { name: "Tisu Ganal", category: "Kebutuhan Harian", hpp: 8000, price: 8000 },
+            { name: "Sosis Kanzler", category: "Makanan", hpp: 10000, price: 10000 },
+            { name: "Kopiko 78", category: "Minuman", hpp: 8000, price: 8000 },
+            { name: "Nescafe", category: "Minuman", hpp: 8000, price: 8000 },
+            { name: "Kopi Tarik", category: "Minuman", hpp: 7000, price: 7000 },
+            { name: "Qtela", category: "Makanan", hpp: 7000, price: 7000 },
+            { name: "Taro Ganal", category: "Makanan", hpp: 6000, price: 6000 },
+            { name: "Tic Tic Ganal", category: "Makanan", hpp: 6000, price: 6000 },
+            { name: "Twistko Ganal", category: "Makanan", hpp: 6000, price: 6000 },
+            { name: "Kusuka Ganal", category: "Makanan", hpp: 6000, price: 6000 },
+            { name: "Kusuka", category: "Makanan", hpp: 2500, price: 2500 },
+            { name: "Chitato", category: "Makanan", hpp: 3000, price: 3000 },
+            { name: "Taro", category: "Makanan", hpp: 2500, price: 2500 },
+            { name: "Chiki Ball", category: "Makanan", hpp: 2000, price: 2000 },
+            { name: "Sip Ganal", category: "Makanan", hpp: 2000, price: 2000 },
+            { name: "Taiko", category: "Makanan", hpp: 3000, price: 3000 },
+            { name: "Roti Aoka", category: "Makanan", hpp: 2000, price: 2000 },
+            { name: "Roti Biasa", category: "Makanan", hpp: 1000, price: 1000 },
+            { name: "Wafer Nabati Ganal", category: "Makanan", hpp: 2000, price: 2000 },
+            { name: "Roti Halus", category: "Makanan", hpp: 1000, price: 1000 },
+            { name: "Slai O'lai", category: "Makanan", hpp: 2500, price: 2500 },
+            { name: "Sari Gandum", category: "Makanan", hpp: 2500, price: 2500 },
+            { name: "Beng-Beng", category: "Makanan", hpp: 2500, price: 2500 },
+            { name: "Super Star", category: "Makanan", hpp: 1000, price: 1000 },
+            { name: "Yupi", category: "Makanan", hpp: 1000, price: 1000 },
+            { name: "Chocolatos", category: "Makanan", hpp: 500, price: 500 },
+            { name: "Ahh", category: "Makanan", hpp: 500, price: 500 },
+            { name: "Pilus", category: "Makanan", hpp: 1000, price: 1000 },
+            { name: "Snack Renteng", category: "Makanan", hpp: 2000, price: 2000 },
+            { name: "Tisu Semua Macam", category: "Kebutuhan Harian", hpp: 10000, price: 10000 },
+            { name: "Kopi Renteng Semua", category: "Bumbu & Sembako", hpp: 2000, price: 2000 },
+            { name: "Energen", category: "Bumbu & Sembako", hpp: 3000, price: 3000 },
+            { name: "Teh Renteng", category: "Bumbu & Sembako", hpp: 1500, price: 1500 },
+            { name: "Susu Enak", category: "Bumbu & Sembako", hpp: 1500, price: 1500 },
+            { name: "Kuku Bima", category: "Bumbu & Sembako", hpp: 2000, price: 2000 },
+            { name: "Extra Joss", category: "Bumbu & Sembako", hpp: 2000, price: 2000 },
+            { name: "Kingkong Halus", category: "Kebutuhan Harian", hpp: 5000, price: 5000 },
+            { name: "Kingkong Jumbo", category: "Kebutuhan Harian", hpp: 6000, price: 6000 },
+            { name: "Softex Ungu", category: "Kebutuhan Harian", hpp: 2000, price: 2000 },
+            { name: "Softex Biru", category: "Kebutuhan Harian", hpp: 2000, price: 2000 },
+            { name: "Softex Hijau", category: "Kebutuhan Harian", hpp: 2000, price: 2000 },
+            { name: "Kopi Kapal Api Ganal", category: "Bumbu & Sembako", hpp: 5000, price: 5000 },
+            { name: "Kopi Kapal Api Halus", category: "Bumbu & Sembako", hpp: 1500, price: 1500 },
+            { name: "Kecap Renteng", category: "Bumbu & Sembako", hpp: 500, price: 500 },
+            { name: "Masako", category: "Bumbu & Sembako", hpp: 500, price: 500 },
+            { name: "Royco", category: "Bumbu & Sembako", hpp: 500, price: 500 },
+            { name: "Boncabe", category: "Bumbu & Sembako", hpp: 1500, price: 1500 },
+            { name: "Sambal Terasi", category: "Bumbu & Sembako", hpp: 1500, price: 1500 },
+            { name: "Desaku Marinasi", category: "Bumbu & Sembako", hpp: 2000, price: 2000 },
+            { name: "Racik Marinasi", category: "Bumbu & Sembako", hpp: 2000, price: 2000 },
+            { name: "Racik Bumbu Sop", category: "Bumbu & Sembako", hpp: 2000, price: 2000 },
+            { name: "Racik Ikan Goreng", category: "Bumbu & Sembako", hpp: 2000, price: 2000 },
+            { name: "Desaku Ketumbar", category: "Bumbu & Sembako", hpp: 1500, price: 1500 },
+            { name: "Desaku Kunyit", category: "Bumbu & Sembako", hpp: 1500, price: 1500 },
+            { name: "Sahang", category: "Bumbu & Sembako", hpp: 500, price: 500 },
+            { name: "Sajiku Galapung", category: "Bumbu & Sembako", hpp: 3000, price: 3000 },
+            { name: "Galapung Biasa", category: "Bumbu & Sembako", hpp: 6000, price: 6000 },
+            { name: "Gula 1/2 Kg", category: "Bumbu & Sembako", hpp: 10000, price: 10000 },
+            { name: "Gula 1 Kg", category: "Bumbu & Sembako", hpp: 20000, price: 20000 },
             { name: "Pertalite (Pom Mini)", category: "Bahan Bakar", hpp: 10000, price: 13000 },
             { name: "Pertamax (Pom Mini)", category: "Bahan Bakar", hpp: 12500, price: 13500 }
         ];
@@ -428,22 +487,14 @@
         let isFilterLowStockOnly = false;
 
         function initializeData() {
-            const savedProducts = localStorage.getItem('umkm_products_v2');
-            const savedTransactions = localStorage.getItem('umkm_transactions_v2');
+            // Storage Key v3 untuk sinkronisasi otomatis 111 produk presisi
+            const savedProducts = localStorage.getItem('umkm_products_v3');
+            const savedTransactions = localStorage.getItem('umkm_transactions_v3');
 
             if (savedProducts) {
                 products = JSON.parse(savedProducts);
             } else {
-                products = rawProducts.map((p, index) => ({
-                    id: 'PRD-' + (index + 1).toString().padStart(3, '0'),
-                    name: p.name,
-                    category: p.category.replace('Grup: ', ''),
-                    hpp: p.hpp || Math.round(p.price * 0.8),
-                    price: p.price,
-                    stock: p.category === 'Bahan Bakar' ? 500 : Math.floor(Math.random() * 25) + 5,
-                    imageColor: getRandomColor(p.category.replace('Grup: ', ''))
-                }));
-                saveData();
+                buildDefaultProducts();
             }
 
             if (savedTransactions) {
@@ -453,14 +504,37 @@
             refreshCategoryList();
         }
 
+        function buildDefaultProducts() {
+            products = rawProducts.map((p, index) => ({
+                id: 'PRD-' + (index + 1).toString().padStart(3, '0'),
+                name: p.name,
+                category: p.category,
+                hpp: p.hpp,
+                price: p.price,
+                stock: p.category === 'Bahan Bakar' ? 500 : 50,
+                imageColor: getRandomColor(p.category)
+            }));
+            saveData();
+        }
+
+        function resetDefaultData() {
+            if(confirm("Apakah Anda yakin ingin mengembalikan seluruh daftar produk & harga ke data awal presisi?")) {
+                buildDefaultProducts();
+                renderCategories();
+                renderProducts();
+                renderAdminProducts();
+                showMessage("Daftar produk berhasil di-reset ke data asli!");
+            }
+        }
+
         function refreshCategoryList() {
             const uniqueCats = ["Semua", ...new Set(products.map(p => p.category))];
             categories = uniqueCats;
         }
 
         function saveData() {
-            localStorage.setItem('umkm_products_v2', JSON.stringify(products));
-            localStorage.setItem('umkm_transactions_v2', JSON.stringify(transactions));
+            localStorage.setItem('umkm_products_v3', JSON.stringify(products));
+            localStorage.setItem('umkm_transactions_v3', JSON.stringify(transactions));
             updateLowStockBadge();
         }
 
@@ -876,7 +950,7 @@
                     products[pIndex].stock = Math.max(0, Math.round((products[pIndex].stock - item.qty) * 1000) / 1000);
                 }
 
-                const hpp = item.product.hpp || (item.product.price * 0.8);
+                const hpp = item.product.hpp || item.product.price;
                 const itemProfit = (item.product.price - hpp) * item.qty;
                 totalProfit += itemProfit;
 
@@ -1110,7 +1184,6 @@
             const product = products.find(p => p.id === id);
             if(!product) return;
 
-            // Memasukkan konfirmasi halus menggunakan tombol visual
             const isConfirmed = confirm(`Apakah Anda yakin ingin menghapus "${product.name}"?\n(Data transaksi lama tidak akan terpengaruh)`);
             if(isConfirmed) {
                 products = products.filter(p => p.id !== id);
@@ -1164,7 +1237,7 @@
                 id: newId,
                 name: name,
                 category: category,
-                hpp: hpp || Math.round(price * 0.8),
+                hpp: hpp || price,
                 price: price,
                 stock: stock,
                 imageColor: getRandomColor(category)
@@ -1251,23 +1324,20 @@
                         const price = parseFloat(row['Harga Jual'] || row['Harga'] || row['price'] || 0);
                         const stock = parseFloat(row['Stok'] || row['stock'] || 0);
 
-                        // Cek apakah produk dengan nama yang sama sudah ada (Duplikat Check)
                         const existingIndex = products.findIndex(p => p.name.trim().toLowerCase() === name.toString().trim().toLowerCase());
 
                         if (existingIndex !== -1) {
-                            // OPSI 1: Tambah stok baru ke stok lama & Update harga/HPP terbaru
                             products[existingIndex].stock += stock;
                             if (price > 0) products[existingIndex].price = price;
                             if (hpp > 0) products[existingIndex].hpp = hpp;
                             updatedCount++;
                         } else {
-                            // Tambah produk baru
                             const newId = 'PRD-' + Date.now().toString().slice(-5) + Math.floor(Math.random()*10);
                             products.unshift({
                                 id: newId,
                                 name: name.toString().trim(),
                                 category: category,
-                                hpp: hpp || Math.round(price * 0.8),
+                                hpp: hpp || price,
                                 price: price,
                                 stock: stock,
                                 imageColor: getRandomColor(category)
