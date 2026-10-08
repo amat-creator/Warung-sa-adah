@@ -224,6 +224,9 @@
                         <input type="text" id="adminSearchInput" oninput="renderAdminProducts()" placeholder="Cari nama barang untuk diedit..." 
                             class="w-full bg-slate-100 pl-10 pr-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all">
                     </div>
+                    <button onclick="openAddProductModal()" class="bg-purple-600 text-white font-bold px-4 py-2.5 rounded-xl hover:bg-purple-700 transition-colors shrink-0 flex items-center gap-2 text-sm shadow-md shadow-purple-200">
+                        <i class="fas fa-plus"></i> <span>Tambah</span>
+                    </button>
                 </div>
 
                 <div class="flex-1 overflow-y-auto p-4 hide-scrollbar">
@@ -234,6 +237,48 @@
                 
                 <div class="p-4 border-t bg-white flex justify-end">
                     <button onclick="closeProductManager()" class="bg-purple-600 text-white font-bold px-8 py-3 rounded-xl hover:bg-purple-700 transition-colors shadow-lg shadow-purple-200">Tutup</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Product Modal -->
+        <div id="addProductModal" class="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+            <div class="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden transform scale-95 transition-transform duration-300" id="addProductModalContent">
+                <div class="p-5 border-b flex justify-between items-center bg-purple-50">
+                    <h3 class="font-bold text-lg text-purple-900"><i class="fas fa-plus-circle text-purple-600 mr-2"></i>Tambah Produk Baru</h3>
+                    <button onclick="closeAddProductModal()" class="text-slate-400 hover:text-slate-600"><i class="fas fa-times text-xl"></i></button>
+                </div>
+                <div class="p-5 space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Nama Produk</label>
+                        <input type="text" id="newProdName" placeholder="Contoh: Es Teh Manis" class="w-full bg-slate-100 p-3 rounded-xl text-sm font-medium outline-none focus:ring-2 focus:ring-purple-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Kategori</label>
+                        <select id="newProdCategory" class="w-full bg-slate-100 p-3 rounded-xl text-sm font-medium outline-none focus:ring-2 focus:ring-purple-500">
+                            <option value="Makanan">Makanan</option>
+                            <option value="Minuman">Minuman</option>
+                            <option value="Kebutuhan Harian">Kebutuhan Harian</option>
+                            <option value="Bumbu & Sembako">Bumbu & Sembako</option>
+                            <option value="Bahan Bakar">Bahan Bakar</option>
+                        </select>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Harga Jual (Rp)</label>
+                            <input type="number" id="newProdPrice" placeholder="5000" class="w-full bg-slate-100 p-3 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Stok Awal</label>
+                            <input type="number" id="newProdStock" placeholder="50" class="w-full bg-slate-100 p-3 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                    </div>
+                </div>
+                <div class="p-4 border-t flex gap-3 bg-slate-50">
+                    <button onclick="closeAddProductModal()" class="flex-1 py-3 bg-slate-200 text-slate-700 font-bold rounded-xl hover:bg-slate-300 transition-colors">Batal</button>
+                    <button onclick="addNewProduct()" class="flex-1 py-3 bg-purple-600 text-white font-bold rounded-xl hover:bg-purple-700 transition-colors shadow-lg shadow-purple-200">
+                        Simpan Produk
+                    </button>
                 </div>
             </div>
         </div>
@@ -1018,9 +1063,16 @@
                         <div class="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${p.imageColor}">
                             <i class="fas ${getCategoryIcon(p.category)} opacity-60"></i>
                         </div>
-                        <div class="flex-1">
-                            <h4 class="text-sm font-bold text-slate-800 leading-tight">${p.name}</h4>
-                            <p class="text-[10px] text-slate-500 uppercase mt-0.5">${p.category}</p>
+                        <div class="flex-1 min-w-0">
+                            <!-- Input Nama Barang -->
+                            <input type="text" 
+                                value="${p.name}" 
+                                onblur="updateProductData('${p.id}', 'name', this.value)"
+                                onkeypress="if(event.key === 'Enter') { this.blur(); updateProductData('${p.id}', 'name', this.value); }"
+                                class="w-full bg-transparent border-b-2 border-dashed border-slate-200 hover:border-purple-300 focus:border-purple-500 focus:bg-slate-50 text-sm font-bold text-slate-800 leading-tight px-1 py-0.5 outline-none transition-colors rounded-t"
+                                title="Edit Nama Produk"
+                            >
+                            <p class="text-[10px] text-slate-500 uppercase mt-1 px-1">${p.category}</p>
                         </div>
                     </div>
                     
@@ -1050,15 +1102,96 @@
         function updateProductData(id, field, value) {
             const index = products.findIndex(p => p.id === id);
             if(index !== -1) {
-                let numValue = parseFloat(value);
-                if(isNaN(numValue) || numValue < 0) numValue = 0;
+                // Khusus untuk nama barang (teks)
+                if (field === 'name') {
+                    if (value.trim() === '') {
+                        showMessage('Nama produk tidak boleh kosong!', true);
+                        renderAdminProducts(); // Kembalikan ke nama awal
+                        return;
+                    }
+                    products[index][field] = value.trim();
+                } else {
+                    // Khusus untuk harga dan stok (angka)
+                    let numValue = parseFloat(value);
+                    if(isNaN(numValue) || numValue < 0) numValue = 0;
+                    products[index][field] = numValue;
+                }
                 
-                products[index][field] = numValue;
                 saveData(); // Simpan ke localStorage
                 renderProducts(); // Update tampilan halaman depan
                 renderCart(); // Update harga/stok jika kebetulan barang sedang ada di keranjang
-                showMessage(`Sukses update ${field === 'price' ? 'Harga' : 'Stok'}!`);
+                
+                const fieldName = field === 'price' ? 'Harga' : field === 'stock' ? 'Stok' : 'Nama Produk';
+                showMessage(`Sukses update ${fieldName}!`);
             }
+        }
+
+        // --- Fitur Tambah Produk Baru ---
+        function openAddProductModal() {
+            document.getElementById('newProdName').value = '';
+            document.getElementById('newProdPrice').value = '';
+            document.getElementById('newProdStock').value = '';
+            
+            const modal = document.getElementById('addProductModal');
+            const content = document.getElementById('addProductModalContent');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                content.classList.remove('scale-95');
+                content.classList.add('scale-100');
+            }, 10);
+        }
+
+        function closeAddProductModal() {
+            const modal = document.getElementById('addProductModal');
+            const content = document.getElementById('addProductModalContent');
+            modal.classList.add('opacity-0');
+            content.classList.remove('scale-100');
+            content.classList.add('scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        function addNewProduct() {
+            const name = document.getElementById('newProdName').value.trim();
+            const category = document.getElementById('newProdCategory').value;
+            const price = parseFloat(document.getElementById('newProdPrice').value);
+            const stock = parseFloat(document.getElementById('newProdStock').value);
+
+            if (!name) {
+                showMessage('Nama produk wajib diisi!', true);
+                return;
+            }
+            if (isNaN(price) || price < 0) {
+                showMessage('Harga tidak valid!', true);
+                return;
+            }
+            if (isNaN(stock) || stock < 0) {
+                showMessage('Stok tidak valid!', true);
+                return;
+            }
+
+            const newId = 'PRD-' + Date.now().toString().slice(-5);
+            const newProduct = {
+                id: newId,
+                name: name,
+                category: category,
+                price: price,
+                stock: stock,
+                imageColor: getRandomColor(category)
+            };
+
+            products.unshift(newProduct);
+            
+            if (!categories.includes(category)) {
+                categories.push(category);
+                renderCategories();
+            }
+
+            saveData();
+            renderProducts();
+            renderAdminProducts();
+            closeAddProductModal();
+            showMessage(`Berhasil menambahkan ${name}!`);
         }
 
         // Reset Data (Khusus jika ingin mengembalikan aplikasi ke kondisi awal / menghapus semua catatan)
