@@ -181,7 +181,7 @@ document.addEventListener('input', (e) => { const el = e.target, v = window.stat
     // Isi 2 baris ini setelah bikin project Supabase (Settings > API di dashboard Supabase).
     // PENTING: pakai "anon public" key di sini, JANGAN "service_role" (yang itu rahasia, cuma untuk kode.gs).
     const SUPABASE_URL = "https://eggvnfbzucimggsrtwkj.supabase.co";
-    const SUPABASE_ANON_KEY = "sb_publishable_QcuiaZ4sfdCedlq9Touaag_ijdtTMF4";
+    const SUPABASE_ANON_KEY = "sb_publishable_j73ZOKoTdkj5jezS2vOjAw_khbEEBwP";
 
     const defaultState = {
         version: '1.2',
@@ -719,6 +719,27 @@ document.addEventListener('input', (e) => { const el = e.target, v = window.stat
         setTimeout(() => { openWhatsAppSelectorModal(newOrder, waText, num); }, 150);
         render();
     };
+
+    // ===== Rincian Keranjang Kasir: ubah jumlah / hapus satu-satu item =====
+    window.promptKasirCartDetail = () => {
+        if(state.kasirCart.length === 0) return closeModal();
+        showModal('Keranjang Kasir', `<div class="space-y-2 max-h-[55vh] overflow-y-auto">${state.kasirCart.map(item => `
+            <div class="flex items-center gap-2 bg-gray-50 p-2.5 rounded-xl border relative">
+                <button onclick="kasirCartRemove('${item.product.id}')" class="absolute -top-1.5 -right-1.5 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px] shadow"><i class="ph-bold ph-x"></i></button>
+                <div class="flex-1 min-w-0">
+                    <p class="font-bold text-xs truncate">${escapeHTML(item.product.name)}</p>
+                    <p class="text-orange-600 font-black text-xs">${formatRp(item.product.price * item.qty)}</p>
+                </div>
+                <div class="flex items-center bg-white rounded-lg border shrink-0">
+                    <button onclick="kasirCartQty('${item.product.id}', -1)" class="w-7 h-7 font-bold text-gray-600">-</button>
+                    <span class="w-6 text-center text-xs font-bold">${item.qty}</span>
+                    <button onclick="kasirCartQty('${item.product.id}', 1)" class="w-7 h-7 font-bold text-gray-600">+</button>
+                </div>
+            </div>
+        `).join('')}</div>`, `<button onclick="closeModal()" class="w-full bg-gray-900 text-white py-3 rounded-xl font-bold shadow-md">Tutup</button>`);
+    };
+    window.kasirCartQty = (id, delta) => { updateCartQty(id, delta, true); promptKasirCartDetail(); };
+    window.kasirCartRemove = (id) => { updateCartQty(id, -9999, true); promptKasirCartDetail(); };
 
     // ===== Modal Pembayaran Tunai (uang diterima + kembalian otomatis) =====
     window.openKasirPaymentModal = () => {
@@ -1418,7 +1439,7 @@ window.promptBulkEditProducts = () => {
             <div class="flex-1 overflow-y-auto p-3"><div class="shopee-grid">${filtered.map(p => renderProductCard(p, false, true)).join('')}</div></div>
             <div class="bg-white p-4 border-t shadow-lg shrink-0 z-20">
                 <select id="k-cust" class="w-full border p-3 rounded-xl text-sm bg-gray-50 mb-2 font-bold"><option value="Pelanggan Umum">-- Pelanggan Umum --</option>${state.users.filter(u=>u.role==='customer').map(u=>`<option value="${escapeHTML(u.name)}">${escapeHTML(u.name)}</option>`).join('')}</select>
-                <div class="flex justify-between items-center mb-2 font-bold text-sm"><span>Total Item: ${state.kasirCart.reduce((a,b)=>a+b.qty,0)}</span> <button onclick="state.kasirCart=[]; render()" class="text-[10px] text-red-500 bg-red-50 px-2 py-1 rounded border border-red-100">Kosongkan</button></div>
+                <div class="flex justify-between items-center mb-2 font-bold text-sm"><span onclick="promptKasirCartDetail()" class="underline decoration-dotted cursor-pointer">Total Item: ${state.kasirCart.reduce((a,b)=>a+b.qty,0)} <i class="ph ph-caret-right"></i></span> <button onclick="state.kasirCart=[]; render()" class="text-[10px] text-red-500 bg-red-50 px-2 py-1 rounded border border-red-100">Kosongkan</button></div>
                 <div class="flex gap-2">
                     <button onclick="holdKasirOrder()" class="bg-amber-500 text-white p-3 rounded-xl font-bold"><i class="ph-bold ph-pause"></i> Tahan</button>
                     <button onclick="openKasirPaymentModal()" class="flex-1 bg-green-600 text-white py-3 rounded-xl font-bold flex justify-between px-4 text-base shadow-lg"><span>Bayar</span><span class="bg-white/20 px-2 rounded">${formatRp(state.kasirCart.reduce((a,b)=>a+(b.product.price*b.qty),0))}</span></button>
